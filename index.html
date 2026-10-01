@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Examen: Bases Biológicas del Comportamiento</title>
+<style>
+:root{--bg:#f2f5f3;--card:#fff;--ink:#1c2a31;--mut:#5b6b72;--ac:#0e6b68;--acs:#d8ebe9;--ok:#2b7a4b;--oks:#dcefe3;--no:#a93a2a;--nos:#f6dfda;--bd:#cfd9d6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10181b;--card:#182328;--ink:#e6eeee;--mut:#9bb0b3;--ac:#5fc4bd;--acs:#1d3a3b;--ok:#6fd096;--oks:#18382a;--no:#f0897a;--nos:#3d2420;--bd:#2c3b40}}
+:root[data-theme="dark"]{--bg:#10181b;--card:#182328;--ink:#e6eeee;--mut:#9bb0b3;--ac:#5fc4bd;--acs:#1d3a3b;--ok:#6fd096;--oks:#18382a;--no:#f0897a;--nos:#3d2420;--bd:#2c3b40}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1,h2{font-family:Charter,"Iowan Old Style",Georgia,serif;line-height:1.2;margin:0 0 .5em}
+h1{font-size:2rem}h2{font-size:1.3rem}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:20px;margin:16px 0}
+.mut{color:var(--mut);font-size:.9rem}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--ink);padding:10px 14px}
+button:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.pri{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:600}
+.tp{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.tp button[aria-pressed=true]{background:var(--acs);border-color:var(--ac);font-weight:600}
+.bar{height:6px;background:var(--bd);border-radius:3px;overflow:hidden;margin:8px 0 0}
+.bar i{display:block;height:100%;background:var(--ac);transition:width .3s}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px}
+.opt:hover:not(:disabled){border-color:var(--ac)}
+.opt.ok{background:var(--oks);border-color:var(--ok)}
+.opt.no{background:var(--nos);border-color:var(--no)}
+.fb{margin-top:14px;padding:12px 14px;border-radius:8px;border-left:5px solid}
+.fb.ok{background:var(--oks);border-color:var(--ok)}.fb.no{background:var(--nos);border-color:var(--no)}
+.big{font-family:Charter,Georgia,serif;font-size:3rem;margin:0}
+.row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--bd)}
+.rev{margin:12px 0;padding-top:10px;border-top:1px solid var(--bd)}
+.hide{display:none}
+</style></head><body><main>
+<section id="start">
+<h1>Bases Biológicas del Comportamiento</h1>
+<p class="mut">Examen de práctica · Licenciatura en Psicología · Primer cuatrimestre. Las preguntas salen de tus apuntes de clase (diapositivas), del programa de la materia y de fuentes de biología de nivel universitario.</p>
+<div class="card"><h2>Elige los temas</h2><div class="tp" id="topics"></div>
+<p class="mut" id="cnt"></p><button class="pri" id="go">Comenzar examen</button></div>
+</section>
+<section id="quiz" class="hide">
+<div class="mut" id="prog"></div><div class="bar"><i id="pb"></i></div>
+<div class="card"><div class="mut" id="tag"></div><h2 id="q"></h2><div id="opts"></div><div id="fb" class="fb hide" role="status"></div>
+<p><button class="pri hide" id="next">Siguiente pregunta</button></p></div>
+</section>
+<section id="res" class="hide"></section>
+</main>
+<script>
+// [tema, pregunta, [correcta, ...incorrectas], explicación]
+const T={c:"Célula",e:"Evolución",n:"Neuronas e histología",t:"Tipos de neuronas"};
+const Q=[
+["c","¿Qué es una célula animal?",["Unidad estructural y funcional eucariota, con núcleo y sin pared celular","Célula sin núcleo y con pared celular de celulosa","Organismo unicelular con nucleoide","Conjunto de tejidos que forman un órgano"],"Es eucariota (ADN dentro de un núcleo con membrana), tiene organelos membranosos y carece de pared celular y cloroplastos."],
+["c","¿Cuál es la función del núcleo?",["Contener el ADN y controlar las actividades celulares","Producir ATP","Digerir desechos","Sintetizar lípidos"],"El núcleo resguarda el material genético y dirige la expresión génica."],
+["c","¿Qué organelo produce la mayor parte del ATP mediante respiración celular?",["Mitocondria","Lisosoma","Aparato de Golgi","Ribosoma"],"La mitocondria es la 'central de energía' de la célula."],
+["c","Los ribosomas se encargan de:",["Sintetizar proteínas","Almacenar el ADN","Degradar moléculas","Transportar lípidos"],"Traducen el ARNm en cadenas de aminoácidos (proteínas)."],
+["c","¿Qué función tiene el aparato de Golgi?",["Modificar, empaquetar y distribuir proteínas y lípidos","Producir energía","Contener enzimas digestivas","Dividir la célula"],"Recibe productos del retículo endoplasmático y los envía en vesículas."],
+["c","¿Cuál es la función de los lisosomas?",["Digestión intracelular con enzimas hidrolíticas","Síntesis de proteínas","Fotosíntesis","Almacenar ADN"],"Degradan materiales captados y organelos dañados."],
+["c","¿Qué diferencia al retículo endoplasmático rugoso del liso?",["El rugoso tiene ribosomas y sintetiza proteínas; el liso sintetiza lípidos y desintoxica","El rugoso produce ATP y el liso almacena ADN","El liso tiene ribosomas y el rugoso no","No hay diferencia"],"Los ribosomas adheridos dan el aspecto rugoso."],
+["c","La membrana plasmática se caracteriza por ser:",["Selectivamente permeable","Totalmente impermeable","Rígida y de celulosa","Exclusiva del núcleo"],"Regula qué sustancias entran y salen de la célula."],
+["c","¿Qué es una célula procariota?",["Célula sin núcleo definido ni organelos membranosos, con ADN en el nucleoide","Célula con núcleo verdadero","Célula nerviosa","Célula con mitocondrias y Golgi"],"Las bacterias y arqueas son procariotas."],
+["c","¿Cuál es una diferencia entre célula procariota y animal?",["La procariota carece de núcleo y organelos membranosos; la animal los posee","La procariota es siempre más grande","La animal tiene pared celular y la procariota no","Ambas tienen núcleo verdadero"],"Además, la procariota es más pequeña y sencilla, y suele tener pared celular."],
+["e","¿Quién propuso la herencia de caracteres adquiridos y la ley del uso y desuso?",["Jean-Baptiste Lamarck","Charles Darwin","Gregor Mendel","Stephen J. Gould"],"Lamarck (lamarckismo): los órganos se desarrollan con el uso y el cambio se hereda. Hoy está descartado."],
+["e","¿Cuál es la idea central de la teoría de Darwin y Wallace?",["Selección natural: sobreviven y se reproducen más los individuos mejor adaptados","Los caracteres adquiridos se heredan","La evolución ocurre solo por saltos","Las especies nunca cambian"],"Variación heredable + competencia + reproducción diferencial."],
+["e","La Teoría Sintética (neodarwinismo) une la selección natural con:",["La genética mendeliana (Dobzhansky, Mayr, Huxley)","El creacionismo","El lamarckismo","La generación espontánea"],"Explica la evolución como cambio genético en poblaciones."],
+["e","¿Qué propone el equilibrio puntuado y quiénes lo plantearon?",["Largos periodos de estasis con cambios rápidos; Eldredge y Gould","Cambio lento y constante; Darwin","Uso y desuso; Lamarck","Herencia mendeliana; Mendel"],"Se opone al gradualismo estricto."],
+["e","En genética de poblaciones, la evolución es:",["El cambio en las frecuencias alélicas de una población de una generación a otra","El cambio de un individuo durante su vida","La mutación de una sola célula","La extinción de especies"],"Los individuos no evolucionan; las poblaciones sí."],
+["e","¿Qué es la adaptación?",["Rasgo heredable que aumenta la eficacia biológica (fitness) en un ambiente","Cambio que el individuo adquiere y transmite por esfuerzo","Cualquier mutación","Migración de una población"],"Es resultado de la selección natural."],
+["e","¿Qué mide la heredabilidad?",["La proporción de la variación de un rasgo en una población atribuible a diferencias genéticas","Cuánto se parece un hijo a su padre","El número de genes de un individuo","La probabilidad de mutar"],"Es un concepto poblacional, no individual."],
+["e","¿Qué es la encefalización acelerada en el linaje humano?",["Aumento rápido del tamaño cerebral relativo al cuerpo, sobre todo en el género Homo","Reducción del cerebro","Crecimiento del cerebelo solamente","Aumento del tamaño corporal sin cambio cerebral"],"Se asocia con dieta de calidad, herramientas y vida social compleja."],
+["e","¿Cómo se relaciona la alimentación con la evolución del cerebro?",["Una dieta rica en energía (carne, cocción) permitió sostener un cerebro costoso","No tiene relación","La dieta vegetal exclusiva lo explica","Solo influye en el tamaño de los dientes"],"Hipótesis del tejido costoso (Aiello y Wheeler): el cerebro consume mucha energía."],
+["e","Un hito evolutivo clave de los homínidos que liberó las manos fue:",["El bipedismo","El vuelo","La hibernación","La visión nocturna"],"Facilitó el uso de herramientas, junto con el fuego y el lenguaje."],
+["e","La hipótesis de la 'sopa primitiva' sobre el origen de la vida fue planteada por:",["Oparin y Haldane","Lamarck y Darwin","Mendel y Morgan","Pasteur y Koch"],"Miller y Urey (1953) mostraron que se forman moléculas orgánicas en condiciones de la Tierra primitiva."],
+["e","¿Qué propone el 'mundo de ARN' sobre qué apareció primero?",["Genes primero: moléculas de ARN que almacenaban información y catalizaban reacciones","Metabolismo primero","Células completas","La generación espontánea"],"Los ribozimas apoyan esta idea (Gilbert)."],
+["e","¿Qué sostiene la propuesta del 'metabolismo primero'?",["Redes de reacciones químicas autocatalíticas precedieron a los genes","El ADN fue lo primero","La vida llegó del espacio","Los virus originaron todo"],"Autores: Oparin (coacervados), Wächtershäuser, Kauffman. La panspermia (Arrhenius) dice que la vida vino del espacio."],
+["n","¿Qué es una neurona?",["Célula excitable, unidad funcional del sistema nervioso, que genera y conduce impulsos","Célula de sostén del tejido nervioso","Fibra muscular","Célula sanguínea"],"Recibe, integra y transmite información."],
+["n","¿Qué estudia la histología?",["Los tejidos y su estructura microscópica","Los genes","La conducta","Las hormonas"],"Algunas neuronas llevan el nombre del histólogo que las describió o de su forma."],
+["n","Los dos tipos principales de células del tejido nervioso son:",["Neuronas y neuroglía","Neuronas y miocitos","Neuroglía y eritrocitos","Axones y dendritas"],"Neuronas: conducen impulsos. Neuroglía: sostén."],
+["n","¿Cuál es la función de la neuroglía?",["Sostener, nutrir y proteger a las neuronas","Generar los potenciales de acción principales","Secretar hormonas","Contraer músculos"],"Incluye células como las de Schwann."],
+["n","¿Qué función tienen las dendritas?",["Recibir señales de otras células y llevarlas al cuerpo celular","Liberar neurotransmisores","Producir mielina","Contener el núcleo"],"Son prolongaciones ramificadas receptoras."],
+["n","¿Qué función tiene el axón?",["Conducir el impulso nervioso desde el cuerpo celular hacia las terminales","Recibir información","Sintetizar ADN","Digerir desechos"],"Normalmente hay un solo axón por neurona."],
+["n","El cuerpo celular (soma) contiene:",["Núcleo y organelos como mitocondrias y cuerpos de Nissl; es el centro metabólico","Solo mielina","Solo vesículas sinápticas","Los nódulos de Ranvier"],"Soma y cuerpo celular son sinónimos."],
+["n","La vaina de mielina:",["Aísla el axón y acelera la conducción del impulso","Recibe señales","Sintetiza proteínas","Es el núcleo de la neurona"],"En el sistema nervioso periférico la forman las células de Schwann."],
+["n","¿Qué es un nódulo de Ranvier?",["Espacio sin mielina entre segmentos de la vaina que permite la conducción saltatoria","El núcleo de la neurona","La terminal del axón","Una dendrita"],"El impulso 'salta' de nódulo a nódulo, lo que lo acelera."],
+["n","El botón terminal sináptico:",["Libera neurotransmisores hacia la siguiente célula","Recibe estímulos del ambiente","Produce mielina","Contiene el núcleo"],"Se ubica en el extremo del axón terminal."],
+["n","En una neurona, la 'zona gatillo' es:",["La región (segmento inicial del axón) donde se origina el potencial de acción","El final del axón","El núcleo","El nódulo de Ranvier"],"Aparece rotulada en los esquemas de neuronas de tus diapositivas."],
+["n","Según tus diapositivas, ¿dónde se encuentran las células de Purkinje y las piramidales?",["Purkinje en el cerebelo; piramidales en la corteza cerebral","Ambas en la médula","Purkinje en la retina; piramidales en el oído","Ambas en el cerebelo"],"Reciben nombre por el histólogo que las describió o por su forma."],
+["n","¿Qué es una fibra nerviosa?",["Un axón (con sus envolturas) que conduce impulsos","Una dendrita corta","Un cuerpo celular","Un tipo de neuroglía"],"Las fibras forman los nervios y los tractos."],
+["n","Según la clasificación funcional, las neuronas se dividen en:",["Sensitivas (aferentes), motoras (eferentes) e interneuronas","Multipolares, bipolares y unipolares","Mielínicas y amielínicas","Gliales y sinápticas"],"Estructural = forma; funcional = tarea."],
+["t","¿Qué neuronas tienen varias dendritas y un solo axón?",["Multipolares","Bipolares","Unipolares","Ninguna"],"Son el tipo más común."],
+["t","¿Dónde se encuentran las neuronas multipolares?",["En el encéfalo y la médula espinal; incluye neuronas motoras","En la retina","En el oído interno","Solo en el área olfatoria"],"La mayoría de las neuronas motoras son multipolares."],
+["t","¿Cómo está estructurada una neurona bipolar?",["Una dendrita principal y un axón","Varias dendritas y un axón","Una sola prolongación continua","Sin axón"],"El cuerpo celular queda entre ambas prolongaciones."],
+["t","¿Dónde se encuentran las neuronas bipolares?",["Retina del ojo, oído interno y área olfatoria del encéfalo","Médula espinal","Corteza motora","Músculos"],"Son principalmente sensoriales."],
+["t","En las neuronas unipolares:",["Dendritas y axón se fusionan en una prolongación continua que sale del cuerpo celular","Hay varias dendritas","Hay una dendrita y un axón separados","No existe axón"],"Tienen prolongación periférica y central."],
+["t","¿Por qué las neuronas unipolares se llaman más adecuadamente seudounipolares?",["Por su origen embriológico: nacen bipolares y sus prolongaciones se fusionan","Porque tienen dos axones","Porque no tienen núcleo","Porque son gliales"],"Suelen ser neuronas sensitivas (aferentes)."],
+["t","Un esquema muestra un cuerpo celular unido por un lado a una prolongación periférica y una central. Es una neurona:",["Unipolar","Bipolar","Multipolar","Glial"],"El cuerpo queda lateral, fuera del trayecto de la prolongación."],
+["t","¿Qué criterio usa la clasificación estructural de las neuronas?",["El número de prolongaciones que salen del cuerpo celular","La dirección del impulso","El neurotransmisor","La presencia de mielina"],"Multipolar, bipolar o unipolar."]
+];
+const $=id=>document.getElementById(id);
+let sel=new Set(Object.keys(T)),list=[],i=0,score=0,log=[];
+const shuf=a=>{a=[...a];for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
+function drawTopics(){
+ $("topics").innerHTML=Object.entries(T).map(([k,v])=>`<button aria-pressed="${sel.has(k)}" data-k="${k}">${v}</button>`).join("");
+ $("topics").querySelectorAll("button").forEach(b=>b.onclick=()=>{const k=b.dataset.k;sel.has(k)?sel.delete(k):sel.add(k);drawTopics()});
+ const n=Q.filter(q=>sel.has(q[0])).length;$("cnt").textContent=n+" preguntas seleccionadas";$("go").disabled=!n}
+$("go").onclick=()=>{list=shuf(Q.filter(q=>sel.has(q[0])));i=0;score=0;log=[];$("start").classList.add("hide");$("res").classList.add("hide");$("quiz").classList.remove("hide");show()};
+function show(){
+ const q=list[i];$("prog").textContent=`Pregunta ${i+1} de ${list.length} · Aciertos: ${score}`;$("pb").style.width=(i/list.length*100)+"%";
+ $("tag").textContent=T[q[0]];$("q").textContent=q[1];$("fb").classList.add("hide");$("next").classList.add("hide");
+ $("next").textContent=i==list.length-1?"Ver resultado":"Siguiente pregunta";
+ const o=shuf(q[2].map((t,k)=>({t,ok:k==0})));
+ $("opts").innerHTML="";
+ o.forEach(x=>{const b=document.createElement("button");b.className="opt";b.textContent=x.t;b.onclick=()=>answer(x,b,o,q);x.b=b;$("opts").appendChild(b)});
+ window.scrollTo({top:0})}
+function answer(x,b,o,q){
+ o.forEach(y=>{y.b.disabled=true;if(y.ok)y.b.classList.add("ok")});
+ if(x.ok)score++;else b.classList.add("no");
+ log.push({q,ok:x.ok,mine:x.t});
+ const f=$("fb");f.className="fb "+(x.ok?"ok":"no");
+ f.innerHTML=`<strong>${x.ok?"¡Correcto!":"Incorrecto."}</strong> ${q[3]}`;
+ $("next").classList.remove("hide");$("next").focus()}
+$("next").onclick=()=>{i++;i<list.length?show():finish()};
+function finish(){
+ $("quiz").classList.add("hide");const r=$("res");r.classList.remove("hide");
+ const p=Math.round(score/list.length*100),by={};
+ log.forEach(l=>{const t=l.q[0];by[t]=by[t]||[0,0];by[t][1]++;if(l.ok)by[t][0]++});
+ const msg=p>=90?"Excelente dominio del tema.":p>=70?"Buen nivel. Repasa los errores.":p>=60?"Aprobado justo. Conviene repasar.":"Necesitas repasar más antes del examen.";
+ const wrong=log.filter(l=>!l.ok);
+ r.innerHTML=`<div class="card"><h1>Resultado</h1><p class="big">${score} / ${list.length} <span class="mut">(${p}%)</span></p><p>${msg}</p>
+ <h2>Por tema</h2>${Object.entries(by).map(([t,v])=>`<div class="row"><span>${T[t]}</span><strong>${v[0]} / ${v[1]}</strong></div>`).join("")}
+ <p><button class="pri" id="again">Reintentar</button> <button id="home">Cambiar temas</button></p></div>
+ <div class="card"><h2>Revisión de errores (${wrong.length})</h2>${wrong.length?wrong.map(l=>`<div class="rev"><strong>${l.q[1]}</strong><br><span style="color:var(--no)">Tu respuesta: ${l.mine}</span><br><span style="color:var(--ok)">Correcta: ${l.q[2][0]}</span><br><span class="mut">${l.q[3]}</span></div>`).join(""):"<p>Sin errores. ¡Perfecto!</p>"}</div>`;
+ $("again").onclick=()=>$("go").click();
+ $("home").onclick=()=>{r.classList.add("hide");$("start").classList.remove("hide");drawTopics()};
+ window.scrollTo({top:0})}
+drawTopics();
+</script></body></html>
